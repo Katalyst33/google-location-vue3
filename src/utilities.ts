@@ -20,7 +20,7 @@ export function LoadGoogleMapFunction() {
   console.log("Loading App", document.getElementById("autocompleteInput"));
 }
 
-function showLocationOnTheMap(latitude: number, longitude: number) {
+export function showLocationOnTheMap(latitude: number, longitude: number) {
   var mapArea = document.getElementById("mapArea") as HTMLInputElement;
 
   // Show & center the Map based oon

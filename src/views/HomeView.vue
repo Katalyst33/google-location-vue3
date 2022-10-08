@@ -4,7 +4,7 @@ import Spinner from "../components/icons/Spinner.vue";
 
 import axios from "axios";
 import { onMounted, ref } from "vue";
-import { LoadGoogleMapFunction } from "../utilities";
+import { LoadGoogleMapFunction, showLocationOnTheMap } from "../utilities";
 // import { initMap } from "../googleMapsUtils";
 import { useScriptTag } from "@vueuse/core";
 
@@ -42,6 +42,11 @@ function locatorButtonPressed() {
             position.coords.latitude,
             position.coords.longitude
           );
+
+          showLocationOnTheMap(
+            position.coords.latitude,
+            position.coords.longitude
+          );
           console.log("Latitude is :", position.coords.latitude);
           console.log("Longitude is :", position.coords.longitude);
         },
@@ -53,6 +58,7 @@ function locatorButtonPressed() {
     );
     // navigator.geolocation.getCurrentPosition(showPosition);
   } else {
+    mapData.value.error = "Your browser does not support geolocation API";
     mapData.value.isLoading = false;
 
     console.log("Geolocation is not supported by this browser.");
@@ -90,59 +96,62 @@ function getAddressFromCoordinates(lat: number, long: number) {
 <template>
   <div>
     <main class="flex justify-center">
-      <section id="mapArea"></section>
+      <div class="relative">
+        <section id="mapArea"></section>
 
-      <div class="pac-card" id="pac-card"></div>
+        <section class="z-20">
+          <div class="max-w-lg py-14 border rounded-md bg-white mt-72">
+            <div class="p-4">
+              <div>
+                <div>
+                  <div
+                    v-show="mapData.error"
+                    class="bg-red-100 border text-sm py-2 my-2 border-red-500 rounded-md"
+                  >
+                    <p
+                      class="text-red-500 text-center"
+                      v-html="mapData.error"
+                    ></p>
+                  </div>
 
-      <div id="infowindow-content">
-        <span id="place-name" class="title"></span><br />
-        <span id="place-address"></span>
-      </div>
+                  {{ mapData.isLoading }}
+                  <input
+                    v-model="mapData.address"
+                    class="border py-3 w-96 rounded-sm"
+                    placeholder="Enter your Address"
+                    type="text"
+                    ref="autocompleteInput"
+                    id="autocompleteInput"
+                  />
+                  <button
+                    @click="locatorButtonPressed"
+                    class="bg-red-500 py-[17px] px-4 rounded-sm"
+                  >
+                    <Spinner v-if="mapData.isLoading" />
 
-      <div class="max-w-lg py-14 border rounded-md">
-        <div class="p-4">
-          <div class="z-10">
-            <div>
-              <div
-                v-show="mapData.error"
-                class="bg-red-100 border text-sm py-2 my-2 border-red-500 rounded-md"
-              >
-                <p class="text-red-500 text-center" v-html="mapData.error"></p>
+                    <MapIcon v-if="!mapData.isLoading" />
+                  </button>
+                </div>
               </div>
-
-              {{ mapData.isLoading }}
-              <input
-                v-model="mapData.address"
-                class="border py-3 w-96 rounded-sm"
-                placeholder="Enter your Address"
-                type="text"
-                ref="autocompleteInput"
-                id="autocompleteInput"
-              />
-              <button
-                @click="locatorButtonPressed"
-                class="bg-red-500 py-[17px] px-4 rounded-sm"
               >
-                <Spinner v-if="mapData.isLoading" />
 
-                <MapIcon v-if="!mapData.isLoading" />
+              <button
+                @click="
+                  getAddressFromCoordinates(
+                    55.83674197542296,
+                    -4.510805172428572
+                  )
+                "
+                class="bg-red-500 text-white p-2 px-4 my-4"
+              >
+                Go
               </button>
+              <div class="bg-red-500 p-10">
+                <Spinner v-if="mapData.isLoading" />
+              </div>
             </div>
           </div>
-          >
-
-          <button
-            @click="
-              getAddressFromCoordinates(55.83674197542296, -4.510805172428572)
-            "
-            class="bg-red-500 text-white p-2 px-4 my-4"
-          >
-            Go
-          </button>
-          <div class="bg-red-500 p-10">
-            <Spinner v-if="mapData.isLoading" />
-          </div>
-        </div>
+        </section>
       </div>
     </main>
   </div>
@@ -157,6 +166,8 @@ function getAddressFromCoordinates(lat: number, long: number) {
   bottom: 0;
   width: 500px;
   height: 500px;
+  background-color: pink;
+  z-index: -1;
 }
 
 .pac-card {

@@ -2,8 +2,9 @@
 import MapIcon from "../components/icons/MapIcon.vue";
 
 import axios from "axios";
-import { ref } from "vue";
-// import {} from "@types/google.maps";
+import { onMounted, ref } from "vue";
+import { loadApp } from "../utilities";
+
 import Spinner from "../components/icons/Spinner.vue";
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAP_API;
@@ -13,22 +14,13 @@ const mapData = ref({
   isLoading: false,
 });
 
-const map = ref<HTMLElement | null>();
-/* const GeolocationPositionError = ref([
-  {
-    code: 1,
-    message:
-      "	The acquisition of the geolocation information failed because the page didn't have the permission to do it.",
-  },
-  {
-    code: 2,
-    message: "Requested Position unavailable",
-  },
-  {
-    code: 3,
-    message: "Geolocation information was not obtained in the allowed time.",
-  },
-]); */
+const mapArea = ref<Element | null>();
+
+const autocompleteInput = ref<null>(null);
+
+onMounted(() => {
+  loadApp();
+});
 
 function locatorButtonPressed() {
   mapData.value.isLoading = true;
@@ -60,8 +52,6 @@ function locatorButtonPressed() {
   }
 }
 
-// get address from coordinates
-
 function getAddressFromCoordinates(lat: number, long: number) {
   axios
     .get(
@@ -88,27 +78,7 @@ function getAddressFromCoordinates(lat: number, long: number) {
       mapData.value.isLoading = false;
     });
 }
-
-// get coordinates from address
-
-interface googleMaps {
-  maps: {
-    Map: new (
-      arg0: HTMLElement | null,
-      arg1: { center: { lat: number; lng: number }; zoom: number }
-    ) => any;
-  };
-}
-/* function showLocationOnTheMap(latitude: number, longitude: number) {
-  const map = new google.maps.Map(document.getElementById("map"), {
-    zoom: 15,
-    center: new google.maps.LatLng(latitude, longitude) as googleMaps,
-    mapTypeId: google.maps.MapTypeId.ROADMAP,
-  });
-} */
 </script>
-
-<!-- 55.83674197542296, -4.510805172428572 -->
 
 <template>
   <main class="flex justify-center">
@@ -128,6 +98,8 @@ interface googleMaps {
             class="border py-3 w-96 rounded-sm"
             placeholder="Enter your Address"
             type="text"
+            ref="autocompleteInput"
+            id="autocompleteInput"
           />
           <button
             @click="locatorButtonPressed"
@@ -151,7 +123,7 @@ interface googleMaps {
         </div>
       </div>
 
-      <div id="map">Map area</div>
+      <div ref="mapArea" id="map">Map area</div>
     </div>
   </main>
 </template>

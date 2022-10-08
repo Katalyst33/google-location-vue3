@@ -1,4 +1,4 @@
-export function loadApp() {
+export function LoadGoogleMapFunction() {
   const input = document.getElementById(
     "autocompleteInput"
   ) as HTMLInputElement;

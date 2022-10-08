@@ -1,13 +1,23 @@
 <script setup lang="ts">
 import MapIcon from "../components/icons/MapIcon.vue";
+import Spinner from "../components/icons/Spinner.vue";
 
 import axios from "axios";
 import { onMounted, ref } from "vue";
-import { loadApp } from "../utilities";
-
-import Spinner from "../components/icons/Spinner.vue";
+import { LoadGoogleMapFunction } from "../utilities";
+import { useScriptTag } from "@vueuse/core";
 
 const API_KEY = import.meta.env.VITE_GOOGLE_MAP_API;
+
+useScriptTag(
+  `https://maps.googleapis.com/maps/api/js?libraries=places&key=${API_KEY}`,
+  // on script tag loaded.
+  (el: HTMLScriptElement) => {
+    // do something
+    LoadGoogleMapFunction();
+  }
+);
+
 const mapData = ref({
   address: "",
   error: "",
@@ -18,9 +28,7 @@ const mapArea = ref<Element | null>();
 
 const autocompleteInput = ref<null>(null);
 
-onMounted(() => {
-  loadApp();
-});
+onMounted(() => {});
 
 function locatorButtonPressed() {
   mapData.value.isLoading = true;
